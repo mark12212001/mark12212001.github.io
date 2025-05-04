@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mental Health Checker</title>
+<script src="https://cdn.tailwindcss.com/3.4.16">
+</script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { primary: "#4F46E5", secondary: "#10B981" },
+      borderRadius: {
+        none: "0px",
+        sm: "4px",
+        DEFAULT: "8px",
+        md: "12px",
+        lg: "16px",
+        xl: "20px",
+        "2xl": "24px",
+        "3xl": "32px",
+        full: "9999px",
+        button: "8px",
+      },
+    },
+  },
+};
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Inter', sans-serif;
+background-color: #f9fafb;
+}
+.question-container {
+display: none;
+}
+.question-container.active {
+display: block;
+animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(10px); }
+to { opacity: 1; transform: translateY(0); }
+}
+input[type="radio"] {
+opacity: 0;
+position: absolute;
+}
+input[type="radio"] + label {
+cursor: pointer;
+transition: all 0.3s ease;
+}
+input[type="radio"]:checked + label {
+background-color: rgba(79, 70, 229, 0.1);
+border-color: #4F46E5;
+}
+</style>
+</head>
+<body class="bg-white min-h-screen">
+<!-- Navigation Bar -->
+<nav class="fixed w-full top-0 bg-white shadow-sm z-50">
+<div class="px-4 py-3 flex items-center justify-between">
+<div class="flex items-center">
+<img src="https://static.readdy.ai/image/c8396d4e153df919ee54e8df721ee905/b27a0377e5648d2063306eac6306b33c.png" alt="Logo" class="h-8 w-auto">
+<span class="ml-2 text-lg font-medium">My Mental Health Checker</span>
+</div>
+<div class="w-8 h-8 flex items-center justify-center cursor-pointer">
+<i class="ri-menu-line ri-lg"></i>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="pt-16 pb-20 px-4">
+<!-- Landing Page -->
+<div id="landing-page" class="min-h-[calc(100vh-9rem)]">
+<div class="pt-8 pb-6">
+<div class="rounded-xl overflow-hidden mb-6">
+<img src="https://static.readdy.ai/image/c8396d4e153df919ee54e8df721ee905/432fc1b13a5049e4c0737334a2261c6c.jpeg" alt="Mental Health Illustration" class="w-full h-full object-cover">
+</div>
+<h1 class="text-2xl font-semibold mb-3 text-gray-800">How are you feeling today?</h1>
+<p class="text-gray-600 mb-6">Take our quick 7-question assessment to check in on your mental wellbeing and get personalized insights.</p>
+<div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+<h2 class="text-lg font-medium mb-3 text-gray-800">Why check your mental health?</h2>
+<ul class="space-y-3">
+<li class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-checkbox-circle-line ri-lg"></i>
+</div>
+<span class="text-gray-600">Quick assessment (takes only 2 minutes)</span>
+</li>
+<li class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-checkbox-circle-line ri-lg"></i>
+</div>
+<span class="text-gray-600">100% private and confidential</span>
+</li>
+<li class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-checkbox-circle-line ri-lg"></i>
+</div>
+<span class="text-gray-600">Get instant results and recommendations</span>
+</li>
+<li class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-checkbox-circle-line ri-lg"></i>
+</div>
+<span class="text-gray-600">Based on clinically validated questions</span>
+</li>
+</ul>
+</div>
+<button id="start-assessment" class="w-full py-3 bg-primary text-white font-medium !rounded-button flex items-center justify-center cursor-pointer">
+<span>Start Assessment</span>
+<div class="w-5 h-5 flex items-center justify-center ml-2">
+<i class="ri-arrow-right-line"></i>
+</div>
+</button>
+<p class="text-xs text-gray-500 text-center mt-4">
+Note: This is not a diagnostic tool. If you're experiencing a crisis, please call your local emergency services or mental health helpline.
+</p>
+</div>
+</div>
+<!-- Assessment Questions -->
+<div id="assessment" class="hidden min-h-[calc(100vh-9rem)]">
+<div class="pt-4 pb-6">
+<!-- Progress Bar -->
+<div class="mb-6">
+<div class="flex justify-between items-center mb-2">
+<span id="question-progress" class="text-sm font-medium text-gray-700">Question 1 of 7</span>
+<span id="question-percentage" class="text-sm font-medium text-primary">14%</span>
+</div>
+<div class="w-full bg-gray-200 rounded-full h-2">
+<div id="progress-bar" class="bg-primary h-2 rounded-full" style="width: 14%"></div>
+</div>
+</div>
+<!-- Questions -->
+<div id="questions-container">
+<!-- Question 1 -->
+<div class="question-container active" data-question="1">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How would you rate your overall mood today?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q1" id="q1-1" value="0">
+<label for="q1-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Very good - I feel happy and positive</label>
+</div>
+<div class="relative">
+<input type="radio" name="q1" id="q1-2" value="1">
+<label for="q1-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Good - Generally feeling okay</label>
+</div>
+<div class="relative">
+<input type="radio" name="q1" id="q1-3" value="2">
+<label for="q1-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Fair - Some ups and downs</label>
+</div>
+<div class="relative">
+<input type="radio" name="q1" id="q1-4" value="3">
+<label for="q1-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Poor - Feeling low most of the time</label>
+</div>
+</div>
+</div>
+<!-- Question 2 -->
+<div class="question-container" data-question="2">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How well have you been sleeping lately?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q2" id="q2-1" value="0">
+<label for="q2-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Very well - Getting regular, restful sleep</label>
+</div>
+<div class="relative">
+<input type="radio" name="q2" id="q2-2" value="1">
+<label for="q2-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Fairly well - Some minor sleep issues</label>
+</div>
+<div class="relative">
+<input type="radio" name="q2" id="q2-3" value="2">
+<label for="q2-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Not very well - Frequent sleep problems</label>
+</div>
+<div class="relative">
+<input type="radio" name="q2" id="q2-4" value="3">
+<label for="q2-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Poorly - Severe sleep difficulties</label>
+</div>
+</div>
+</div>
+<!-- Question 3 -->
+<div class="question-container" data-question="3">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How would you describe your stress levels?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q3" id="q3-1" value="0">
+<label for="q3-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Minimal - Handling things well</label>
+</div>
+<div class="relative">
+<input type="radio" name="q3" id="q3-2" value="1">
+<label for="q3-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Moderate - Some stress but manageable</label>
+</div>
+<div class="relative">
+<input type="radio" name="q3" id="q3-3" value="2">
+<label for="q3-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">High - Feeling overwhelmed often</label>
+</div>
+<div class="relative">
+<input type="radio" name="q3" id="q3-4" value="3">
+<label for="q3-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Severe - Constant stress and pressure</label>
+</div>
+</div>
+</div>
+<!-- Question 4 -->
+<div class="question-container" data-question="4">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How is your appetite and eating pattern?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q4" id="q4-1" value="0">
+<label for="q4-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Normal - Regular eating habits</label>
+</div>
+<div class="relative">
+<input type="radio" name="q4" id="q4-2" value="1">
+<label for="q4-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Slightly changed - Minor variations</label>
+</div>
+<div class="relative">
+<input type="radio" name="q4" id="q4-3" value="2">
+<label for="q4-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Moderately changed - Notable differences</label>
+</div>
+<div class="relative">
+<input type="radio" name="q4" id="q4-4" value="3">
+<label for="q4-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Significantly changed - Major changes</label>
+</div>
+</div>
+</div>
+<!-- Question 5 -->
+<div class="question-container" data-question="5">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How well can you focus on tasks and activities?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q5" id="q5-1" value="0">
+<label for="q5-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Very well - Clear and focused</label>
+</div>
+<div class="relative">
+<input type="radio" name="q5" id="q5-2" value="1">
+<label for="q5-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Fairly well - Occasional distractions</label>
+</div>
+<div class="relative">
+<input type="radio" name="q5" id="q5-3" value="2">
+<label for="q5-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Struggling - Frequent difficulty focusing</label>
+</div>
+<div class="relative">
+<input type="radio" name="q5" id="q5-4" value="3">
+<label for="q5-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Very difficult - Cannot concentrate</label>
+</div>
+</div>
+</div>
+<!-- Question 6 -->
+<div class="question-container" data-question="6">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How do you feel about socializing and relationships?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q6" id="q6-1" value="0">
+<label for="q6-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Very social - Enjoying connections</label>
+</div>
+<div class="relative">
+<input type="radio" name="q6" id="q6-2" value="1">
+<label for="q6-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Somewhat social - Moderate interaction</label>
+</div>
+<div class="relative">
+<input type="radio" name="q6" id="q6-3" value="2">
+<label for="q6-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Less social - Preferring alone time</label>
+</div>
+<div class="relative">
+<input type="radio" name="q6" id="q6-4" value="3">
+<label for="q6-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Avoiding - Disconnected from others</label>
+</div>
+</div>
+</div>
+<!-- Question 7 -->
+<div class="question-container" data-question="7">
+<h2 class="text-xl font-medium mb-5 text-gray-800">How do you feel about your future?</h2>
+<div class="space-y-3 mb-8">
+<div class="relative">
+<input type="radio" name="q7" id="q7-1" value="0">
+<label for="q7-1" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Very positive - Optimistic and hopeful</label>
+</div>
+<div class="relative">
+<input type="radio" name="q7" id="q7-2" value="1">
+<label for="q7-2" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Somewhat positive - Generally hopeful</label>
+</div>
+<div class="relative">
+<input type="radio" name="q7" id="q7-3" value="2">
+<label for="q7-3" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Uncertain - Mixed feelings</label>
+</div>
+<div class="relative">
+<input type="radio" name="q7" id="q7-4" value="3">
+<label for="q7-4" class="block w-full p-4 border border-gray-200 rounded-lg text-gray-700">Negative - Feeling hopeless</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Navigation Buttons -->
+<div class="flex space-x-3">
+<button id="prev-btn" class="flex-1 py-3 bg-gray-100 text-gray-700 font-medium !rounded-button flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-arrow-left-line"></i>
+</div>
+<span>Previous</span>
+</button>
+<button id="next-btn" class="flex-1 py-3 bg-primary text-white font-medium !rounded-button flex items-center justify-center cursor-pointer">
+<span>Next</span>
+<div class="w-5 h-5 flex items-center justify-center ml-2">
+<i class="ri-arrow-right-line"></i>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Results Page -->
+<div id="results-page" class="hidden min-h-[calc(100vh-9rem)]">
+<div class="pt-4 pb-6">
+<div class="rounded-xl overflow-hidden mb-6">
+<img src="https://readdy.ai/api/search-image?query=mental%20health%20results%2C%20person%20looking%20at%20chart%2C%20peaceful%20scene%2C%20soft%20lighting%2C%20professional%20illustration%20style%2C%20mental%20wellness%20concept%2C%20emotional%20support%2C%20mindfulness%2C%20therapeutic%20atmosphere%2C%20caring%20community%2C%20data%20visualization&width=375&height=200&seq=2&orientation=landscape" alt="Results Illustration" class="w-full h-full object-cover">
+</div>
+<h1 class="text-2xl font-semibold mb-3 text-gray-800">Your Mental Health Assessment</h1>
+<p class="text-gray-600 mb-6">Completed on May 4, 2025</p>
+<div class="bg-white rounded-lg shadow-sm p-5 mb-6">
+<div class="flex justify-between items-center mb-4">
+<h2 class="text-lg font-medium text-gray-800">Your Results</h2>
+<div id="score-badge" class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+Mild
+</div>
+</div>
+<div class="mb-4">
+<div class="flex justify-between items-center mb-1">
+<span class="text-sm font-medium text-gray-700">Overall Score</span>
+<span id="score-value" class="text-sm font-medium text-primary">5/21</span>
+</div>
+<div class="w-full bg-gray-200 rounded-full h-2">
+<div id="score-bar" class="bg-primary h-2 rounded-full" style="width: 24%"></div>
+</div>
+</div>
+<div class="space-y-4 mb-4">
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-mental-health-line ri-lg"></i>
+</div>
+<div>
+<h3 class="text-sm font-medium text-gray-800">Depression Symptoms</h3>
+<p id="depression-score" class="text-sm text-gray-600">Minimal (2/12)</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-psychotherapy-line ri-lg"></i>
+</div>
+<div>
+<h3 class="text-sm font-medium text-gray-800">Anxiety Symptoms</h3>
+<p id="anxiety-score" class="text-sm text-gray-600">Mild (3/9)</p>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-gray-100">
+<h3 class="text-sm font-medium text-gray-800 mb-2">What this means:</h3>
+<p id="result-interpretation" class="text-sm text-gray-600 mb-3">
+Your results suggest you may be experiencing mild symptoms of anxiety and minimal symptoms of depression. While these symptoms don't appear severe, it's still important to monitor them.
+</p>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow-sm p-5 mb-6">
+<h2 class="text-lg font-medium text-gray-800 mb-4">Personalized Recommendations</h2>
+<div id="specific-recommendations" class="space-y-4">
+<!-- Recommendations will be dynamically inserted here -->
+</div>
+<div class="pt-4 mt-4 border-t border-gray-100">
+<h3 class="text-sm font-medium text-gray-800 mb-3">General Self-Care Tips</h3>
+<div class="space-y-4">
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-secondary mr-2 mt-0.5">
+<i class="ri-heart-pulse-line ri-lg"></i>
+</div>
+<div>
+<h3 class="text-sm font-medium text-gray-800">Self-Care Practices</h3>
+<p class="text-sm text-gray-600">Regular exercise, adequate sleep, and healthy eating can help improve your mental wellbeing.</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-secondary mr-2 mt-0.5">
+<i class="ri-mind-map ri-lg"></i>
+</div>
+<div>
+<h3 class="text-sm font-medium text-gray-800">Mindfulness & Relaxation</h3>
+<p class="text-sm text-gray-600">Try meditation, deep breathing exercises, or yoga to reduce stress and anxiety.</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-secondary mr-2 mt-0.5">
+<i class="ri-group-line ri-lg"></i>
+</div>
+<div>
+<h3 class="text-sm font-medium text-gray-800">Social Connection</h3>
+<p class="text-sm text-gray-600">Maintain regular contact with friends and family for emotional support.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<button id="retake-assessment" class="w-full py-3 bg-white border border-primary text-primary font-medium !rounded-button flex items-center justify-center cursor-pointer">
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-refresh-line"></i>
+</div>
+<span>Retake Assessment</span>
+</button>
+<button id="view-resources" class="w-full py-3 bg-primary text-white font-medium !rounded-button flex items-center justify-center cursor-pointer">
+<div class="w-5 h-5 flex items-center justify-center mr-2">
+<i class="ri-book-open-line"></i>
+</div>
+<span>View Mental Health Resources</span>
+</button>
+</div>
+<p class="text-xs text-gray-500 text-center mt-4">
+Disclaimer: This assessment is not a diagnostic tool. If you're experiencing severe symptoms, please consult a healthcare professional.
+</p>
+</div>
+</div>
+</main>
+<!-- Tab Bar -->
+<div class="fixed bottom-0 w-full bg-white border-t border-gray-200 px-2 py-2 z-50">
+<div class="grid grid-cols-4 gap-1">
+<div class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center text-primary">
+<i class="ri-home-line ri-lg"></i>
+</div>
+<span class="text-xs mt-1 text-primary">Home</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center text-gray-500">
+<i class="ri-history-line ri-lg"></i>
+</div>
+<span class="text-xs mt-1 text-gray-500">History</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center text-gray-500">
+<i class="ri-book-read-line ri-lg"></i>
+</div>
+<span class="text-xs mt-1 text-gray-500">Resources</span>
+</div>
+<div class="flex flex-col items-center justify-center cursor-pointer">
+<div class="w-6 h-6 flex items-center justify-center text-gray-500">
+<i class="ri-user-line ri-lg"></i>
+</div>
+<span class="text-xs mt-1 text-gray-500">Profile</span>
+</div>
+</div>
+</div>
+
+document.addEventListener('DOMContentLoaded', function() {
+const startBtn = document.getElementById('start-assessment');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const retakeBtn = document.getElementById('retake-assessment');
+const viewResourcesBtn = document.getElementById('view-resources');
+const landingPage = document.getElementById('landing-page');
+const assessment = document.getElementById('assessment');
+const resultsPage = document.getElementById('results-page');
+const questionProgress = document.getElementById('question-progress');
+const questionPercentage = document.getElementById('question-percentage');
+const progressBar = document.getElementById('progress-bar');
+const questions = document.querySelectorAll('.question-container');
+let currentQuestion = 1;
+const totalQuestions = questions.length;
+// Start assessment
+startBtn.addEventListener('click', function() {
+landingPage.classList.add('hidden');
+assessment.classList.remove('hidden');
+updateProgressIndicators();
+});
+// Previous question
+prevBtn.addEventListener('click', function() {
+if (currentQuestion > 1) {
+document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.remove('active');
+currentQuestion--;
+document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.add('active');
+updateProgressIndicators();
+}
+});
+// Next question
+nextBtn.addEventListener('click', function() {
+const currentRadioButtons = document.querySelectorAll(`input[name="q${currentQuestion}"]:checked`);
+if (currentRadioButtons.length === 0) {
+showToast("Please select an answer to continue");
+return;
+}
+if (currentQuestion < totalQuestions) {
+document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.remove('active');
+currentQuestion++;
+document.querySelector(`.question-container[data-question="${currentQuestion}"]`).classList.add('active');
+updateProgressIndicators();
+} else {
+// Calculate results
+calculateResults();
+assessment.classList.add('hidden');
+resultsPage.classList.remove('hidden');
+}
+});
+// Retake assessment
+retakeBtn.addEventListener('click', function() {
+resetAssessment();
+resultsPage.classList.add('hidden');
+assessment.classList.remove('hidden');
+});
+// View resources
+viewResourcesBtn.addEventListener('click', function() {
+showToast("Resources page coming soon!");
+});
+// Update progress indicators
+function updateProgressIndicators() {
+const percentage = Math.round((currentQuestion / totalQuestions) * 100);
+questionProgress.textContent = `Question ${currentQuestion} of ${totalQuestions}`;
+questionPercentage.textContent = `${percentage}%`;
+progressBar.style.width = `${percentage}%`;
+// Enable/disable previous button
+prevBtn.disabled = currentQuestion === 1;
+// Update next button text for last question
+if (currentQuestion === totalQuestions) {
+nextBtn.innerHTML = '<span>Get Results</span><div class="w-5 h-5 flex items-center justify-center ml-2"><i class="ri-check-line"></i></div>';
+} else {
+nextBtn.innerHTML = '<span>Next</span><div class="w-5 h-5 flex items-center justify-center ml-2"><i class="ri-arrow-right-line"></i></div>';
+}
+}
+// Calculate results
+function calculateResults() {
+let totalScore = 0;
+let depressionScore = 0;
+let anxietyScore = 0;
+let detailedResults = {
+mood: 0,
+sleep: 0,
+stress: 0,
+appetite: 0,
+focus: 0,
+social: 0,
+outlook: 0
+};
+
+// Calculate detailed scores
+detailedResults.mood = parseInt(document.querySelector('input[name="q1"]:checked').value);
+detailedResults.sleep = parseInt(document.querySelector('input[name="q2"]:checked').value);
+detailedResults.stress = parseInt(document.querySelector('input[name="q3"]:checked').value);
+detailedResults.appetite = parseInt(document.querySelector('input[name="q4"]:checked').value);
+detailedResults.focus = parseInt(document.querySelector('input[name="q5"]:checked').value);
+detailedResults.social = parseInt(document.querySelector('input[name="q6"]:checked').value);
+detailedResults.outlook = parseInt(document.querySelector('input[name="q7"]:checked').value);
+
+// Calculate depression score (questions 1-4)
+depressionScore = detailedResults.mood + detailedResults.sleep + detailedResults.stress + detailedResults.appetite;
+
+// Calculate anxiety score (questions 5-7)
+anxietyScore = detailedResults.focus + detailedResults.social + detailedResults.outlook;
+
+// Calculate total score
+totalScore = depressionScore + anxietyScore;
+
+// Generate specific recommendations based on highest scoring areas
+let specificRecommendations = [];
+if (detailedResults.mood >= 2) specificRecommendations.push("Consider activities that boost your mood like exercise or hobbies");
+if (detailedResults.sleep >= 2) specificRecommendations.push("Focus on improving sleep hygiene and establishing a regular sleep schedule");
+if (detailedResults.stress >= 2) specificRecommendations.push("Practice stress management techniques like meditation or deep breathing");
+if (detailedResults.appetite >= 2) specificRecommendations.push("Monitor your eating patterns and maintain regular meal times");
+if (detailedResults.focus >= 2) specificRecommendations.push("Try breaking tasks into smaller, manageable chunks");
+if (detailedResults.social >= 2) specificRecommendations.push("Gradually increase social interactions and maintain connections");
+if (detailedResults.outlook >= 2) specificRecommendations.push("Focus on setting small, achievable goals for the future");
+// Update score display
+document.getElementById('score-value').textContent = `${totalScore}/21`;
+document.getElementById('score-bar').style.width = `${(totalScore / 21) * 100}%`;
+document.getElementById('depression-score').textContent = getDepressionLevel(depressionScore) + ` (${depressionScore}/12)`;
+document.getElementById('anxiety-score').textContent = getAnxietyLevel(anxietyScore) + ` (${anxietyScore}/9)`;
+// Update score badge and interpretation
+const scoreBadge = document.getElementById('score-badge');
+const resultInterpretation = document.getElementById('result-interpretation');
+// Update recommendations display
+const recommendationsContainer = document.getElementById('specific-recommendations');
+recommendationsContainer.innerHTML = specificRecommendations.map(rec => `
+<div class="flex items-start">
+<div class="w-6 h-6 flex items-center justify-center text-primary mr-2 mt-0.5">
+<i class="ri-focus-2-line ri-lg"></i>
+</div>
+<div>
+<p class="text-sm text-gray-600">${rec}</p>
+</div>
+</div>
+`).join('');
+
+if (totalScore <= 5) {
+scoreBadge.textContent = 'Minimal';
+scoreBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800';
+resultInterpretation.textContent = 'Your results suggest you are experiencing minimal symptoms of anxiety and depression. Continue with your current self-care practices to maintain your mental wellbeing.';
+} else if (totalScore <= 10) {
+scoreBadge.textContent = 'Mild';
+scoreBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800';
+resultInterpretation.textContent = 'Your results suggest you may be experiencing mild symptoms of anxiety and/or depression. While these symptoms don't appear severe, it's still important to monitor them and practice self-care.';
+} else if (totalScore <= 15) {
+scoreBadge.textContent = 'Moderate';
+scoreBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800';
+resultInterpretation.textContent = 'Your results suggest you may be experiencing moderate symptoms of anxiety and/or depression. Consider speaking with a mental health professional for additional support.';
+} else {
+scoreBadge.textContent = 'Severe';
+scoreBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800';
+resultInterpretation.textContent = 'Your results suggest you may be experiencing severe symptoms of anxiety and/or depression. We strongly recommend reaching out to a mental health professional for support.';
+}
+}
+// Get depression level description
+function getDepressionLevel(score) {
+if (score <= 3) return 'Minimal';
+if (score <= 6) return 'Mild';
+if (score <= 9) return 'Moderate';
+return 'Severe';
+}
+// Get anxiety level description
+function getAnxietyLevel(score) {
+if (score <= 2) return 'Minimal';
+if (score <= 4) return 'Mild';
+if (score <= 6) return 'Moderate';
+return 'Severe';
+}
+// Reset assessment
+function resetAssessment() {
+// Clear all selected answers
+document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+input.checked = false;
+});
+// Reset to first question
+document.querySelector('.question-container.active').classList.remove('active');
+document.querySelector('.question-container[data-question="1"]').classList.add('active');
+currentQuestion = 1;
+updateProgressIndicators();
+}
+// Show toast message
+function showToast(message) {
+// Create toast element
+const toast = document.createElement('div');
+toast.className = 'fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm z-50';
+toast.textContent = message;
+document.body.appendChild(toast);
+// Remove toast after 3 seconds
+setTimeout(() => {
+toast.classList.add('opacity-0');
+toast.style.transition = 'opacity 0.5s ease';
+setTimeout(() => {
+document.body.removeChild(toast);
+}, 500);
+}, 3000);
+}
+});
+
+</body>
+</html>
